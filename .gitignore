@@ -1,0 +1,10 @@
+# provided ignore test projects
+00
+13
+demo
+
+# ignore test files, output, and project zip files for all projects
+*/*tst
+*/*cmp
+*/*out
+*/*zip
