@@ -1,2 +1,4 @@
 # nand2tetris
-working through 'The Elements of omputering Systems'
+working through 'The Elements of Computing Systems'
+
+
