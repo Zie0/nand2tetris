@@ -13,20 +13,20 @@
 M=0
 @sign // tracks negative val
 M=1
-@R2
+@R2 // where final result is stored
 M=0
 
 @R0 // determine final sign val from both starting values
-D=M
-@ar0
+D=M // this is done by looking at the sign of each of the given
+@ar0 // args stored in R0 and R1, respectively
 M=D
-@NEXTVAR
+@NEXTARG
 D; JGE
 @ar0
 M=-M
 @sign
 M=-M
-(NEXTVAR)
+(NEXTARG)
 @R1
 D=M
 @ar1
