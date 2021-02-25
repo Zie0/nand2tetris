@@ -40,4 +40,34 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
+    // Decode //
+    DMux16 (in=instruction, sel=instruction[15], a=Ainstruction, b=Cinstruction);
+    // C-instruction (execute)
+
+
+    // ALU 
+    Mux16 (a=Areg, b=inM, sel=c0, out=yALU);
+    ALU (x=Dreg, y=yALU, zx=c1, nx=c2, zy=c3, ny=c4, f=c5, no=c6, zr=zr, ng=ng, out=outM)
+    // End ALU //
+    
+    // Jump control //
+    Not (in=zr, out=NOTzr);
+    Not (in=ng, out=NOTng);
+    // false = NoJMP
+    And (a=NOTzr, b=NOTng, out=JGT);
+    // zr = JEQ
+    OR (a=zr, b=NOTng, out=JGE);
+    // ng = JLT
+    // NOTzr = JNE
+    OR (a=zr, b=ng, out=JLE);
+    // true = JMP
+
+    Mux (a=false, b=JGT, sel=j3, out=s0);
+    Mux (a=zr, b=JGE, sel=j3, out=s1);
+    Mux (a=JLT, b=JNE, sel=j3, out=s2);
+    Mux (a=JLE, b=false, sel=j3, out=s3);
+    Mux (a=s0, b=s1, sel=j2, out=ns0);
+    Mux (a=s2, b=s3, sel=j2, out=ns1);
+    Mux (a=ns0, b=ns1, sel=j1, out=pcLOAD);
+    // End Jump Control //
 }
