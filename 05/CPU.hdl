@@ -55,17 +55,19 @@ CHIP CPU {
     Mux (a=false, b=instruction[1], sel=instruction[15], out=j2);
     Mux (a=false, b=instruction[0], sel=instruction[15], out=j3);
 
-    Mux16 (a=instruction, b=outM, sel=d1, out=toA);
+    Mux16 (a=instruction, b=cycle, sel=d1, out=toA);
+
     ARegister (in=toA, load=d1, out=addressM);
-    DRegister (in=outM, load=d2, out=xALU);
+    
+    DRegister (in=cycle, load=d2, out=xALU);
+    
     Mux (a=false, b=d3, sel=instruction[15], out=writeM);
 
     // compute A or M?    
     Mux16 (a=addressM, b=inM, sel=a, out=yALU);
 
     // ALU 
-    ALU (x=xALU, y=yALU, zx=c1, nx=c2, zy=c3, ny=c4, f=c5, no=c6, zr=zr, ng=ng, out=outM)
-    //ALU (x=xALU, y=yALU, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], zr=zr, ng=ng, out=outM)
+    ALU (x=xALU, y=yALU, zx=c1, nx=c2, zy=c3, ny=c4, f=c5, no=c6, zr=zr, ng=ng, out=cycle, out=outM);
     // End ALU //
     
     // Jump control //
@@ -74,28 +76,19 @@ CHIP CPU {
     // false = NoJMP
     And (a=NOTzr, b=NOTng, out=JGT);
     // zr = JEQ 
-    OR (a=zr, b=NOTng, out=JGE);
+    Or (a=zr, b=NOTng, out=JGE);
     // ng = JLT
     // NOTzr = JNE
-    OR (a=zr, b=ng, out=JLE);
+    Or (a=zr, b=ng, out=JLE);
     // true = JMP
 
     Mux (a=false, b=JGT, sel=j3, out=s0);
-    //Mux (a=false, b=JGT, sel=instruction[0], out=s0);
     Mux (a=zr, b=JGE, sel=j3, out=s1);
-    //Mux (a=zr, b=JGE, sel=instruction[0], out=s1);
     Mux (a=JLT, b=JNE, sel=j3, out=s2);
-    //Mux (a=JLT, b=JNE, sel=instruction[0], out=s2);
     Mux (a=JLE, b=false, sel=j3, out=s3);
-    //Mux (a=JLE, b=false, sel=instruction[0], out=s3);
     Mux (a=s0, b=s1, sel=j2, out=ns0);
-    //Mux (a=s0, b=s1, sel=instruction[1], out=ns0);
-    Mux (a=s0, b=s1, sel=j2, out=ns0);
-    //Mux (a=s0, b=s1, sel=instruction[1], out=ns0);
     Mux (a=s2, b=s3, sel=j2, out=ns1);
-    //Mux (a=s2, b=s3, sel=instruction[1], out=ns1);
     Mux (a=ns0, b=ns1, sel=j1, out=CinsPCload);
-    //Mux (a=ns0, b=ns1, sel=instruction[0], out=CinsPCload);
     // End Jump Control //
 
     // if A-instruction load=true, else use jump control
