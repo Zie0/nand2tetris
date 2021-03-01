@@ -84,7 +84,7 @@ CHIP CPU {
 
     Mux (a=false, b=JGT, sel=j3, out=s0);
     Mux (a=zr, b=JGE, sel=j3, out=s1);
-    Mux (a=JLT, b=JNE, sel=j3, out=s2);
+    Mux (a=ng, b=JNE, sel=j3, out=s2);
     Mux (a=JLE, b=true, sel=j3, out=s3);
     Mux (a=s0, b=s1, sel=j2, out=ns0);
     Mux (a=s2, b=s3, sel=j2, out=ns1);
