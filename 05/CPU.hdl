@@ -40,39 +40,32 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
-    Not (in=true, out=hardcoded[15]);
-    Not (in=true, out=hardcoded[14]);
-    Not (in=true, out=hardcoded[13]);
-    Not (in=true, out=hardcoded[12]);
-    Not (in=false, out=hardcoded[11]);
-    Not (in=true, out=hardcoded[10]);
-    Not (in=false, out=hardcoded[9]);
-    Not (in=true, out=hardcoded[8]);
-    Not (in=false, out=hardcoded[7]);
-    Not (in=true, out=hardcoded[6]);
-    Not (in=false, out=hardcoded[5]);
-    Not (in=true, out=hardcoded[4]);
-    Not (in=true, out=hardcoded[3]);
-    Not (in=true, out=hardcoded[2]);
-    Not (in=true, out=hardcoded[1]);
-    Not (in=true, out=hardcoded[0]);
+    //Decode
+    Mux (a=false, b=instruction[12], sel=instruction[15], out=a);
+    Mux (a=true, b=instruction[11], sel=instruction[15], out=c1);
+    Mux (a=false, b=instruction[10], sel=instruction[15], out=c2);
+    Mux (a=true, b=instruction[9], sel=instruction[15], out=c3);
+    Mux (a=false, b=instruction[8], sel=instruction[15], out=c4);
+    Mux (a=true, b=instruction[7], sel=instruction[15], out=c5);
+    Mux (a=false, b=instruction[6], sel=instruction[15], out=c6);
+    Mux (a=true, b=instruction[5], sel=instruction[15], out=d1);
+    Mux (a=false, b=instruction[4], sel=instruction[15], out=d2);
+    Mux (a=false, b=instruction[3], sel=instruction[15], out=d3);
+    Mux (a=false, b=instruction[2], sel=instruction[15], out=j1);
+    Mux (a=false, b=instruction[1], sel=instruction[15], out=j2);
+    Mux (a=false, b=instruction[0], sel=instruction[15], out=j3);
 
-    // Decode
-    Mux16 (a=hardcoded, b=instruction, sel=instruction[15], out=decoded);
+    Mux16 (a=instruction, b=outM, sel=d1, out=toA);
+    ARegister (in=toA, load=d1, out=addressM);
+    DRegister (in=outM, load=d2, out=xALU);
+    Mux (a=false, b=d3, sel=instruction[15], out=writeM);
 
-    Mux16 (a=instruction, b=outM, sel=decoded[5], out=toA);
-
-    Aregister (in=toA, load=decoded[5], out=addressM);
-    Dregister (in=outM, load=decoded[4], out=xALU);
-    Not (in=decoded[3], out=notWriteM);
-    Not (in=notWriteM, out=writeM);
-    
-    Mux16 (a=addressM, b=inM, sel=decoded[12], out=yALU);
+    // compute A or M?    
+    Mux16 (a=addressM, b=inM, sel=a, out=yALU);
 
     // ALU 
-    Mux16 (a=addressM, b=inM, sel=c0, out=yALU);
-    //ALU (x=xALU, y=yALU, zx=c1, nx=c2, zy=c3, ny=c4, f=c5, no=c6, zr=zr, ng=ng, out=outM)
-    ALU (x=xALU, y=yALU, zx=decoded[11], nx=decoded[10], zy=decoded[9], ny=decoded[8], f=decoded[7], no=decoded[6], zr=zr, ng=ng, out=outM)
+    ALU (x=xALU, y=yALU, zx=c1, nx=c2, zy=c3, ny=c4, f=c5, no=c6, zr=zr, ng=ng, out=outM)
+    //ALU (x=xALU, y=yALU, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], zr=zr, ng=ng, out=outM)
     // End ALU //
     
     // Jump control //
@@ -87,25 +80,25 @@ CHIP CPU {
     OR (a=zr, b=ng, out=JLE);
     // true = JMP
 
-    //Mux (a=false, b=JGT, sel=j3, out=s0);
-    Mux (a=false, b=JGT, sel=decoded[0], out=s0);
-    //Mux (a=zr, b=JGE, sel=j3, out=s1);
-    Mux (a=zr, b=JGE, sel=decoded[0], out=s1);
-    //Mux (a=JLT, b=JNE, sel=j3, out=s2);
-    Mux (a=JLT, b=JNE, sel=decoded[0], out=s2);
-    //Mux (a=JLE, b=false, sel=j3, out=s3);
-    Mux (a=JLE, b=false, sel=decoded[0], out=s3);
-    //Mux (a=s0, b=s1, sel=j2, out=ns0);
-    Mux (a=s0, b=s1, sel=decoded[1], out=ns0);
-    //Mux (a=s0, b=s1, sel=j2, out=ns0);
-    Mux (a=s0, b=s1, sel=decoded[1], out=ns0);
-    //Mux (a=s2, b=s3, sel=j2, out=ns1);
-    Mux (a=s2, b=s3, sel=decoded[1], out=ns1);
-    //Mux (a=ns0, b=ns1, sel=j1, out=CinsPCload);
-    Mux (a=ns0, b=ns1, sel=decoded[0], out=CinsPCload);
+    Mux (a=false, b=JGT, sel=j3, out=s0);
+    //Mux (a=false, b=JGT, sel=instruction[0], out=s0);
+    Mux (a=zr, b=JGE, sel=j3, out=s1);
+    //Mux (a=zr, b=JGE, sel=instruction[0], out=s1);
+    Mux (a=JLT, b=JNE, sel=j3, out=s2);
+    //Mux (a=JLT, b=JNE, sel=instruction[0], out=s2);
+    Mux (a=JLE, b=false, sel=j3, out=s3);
+    //Mux (a=JLE, b=false, sel=instruction[0], out=s3);
+    Mux (a=s0, b=s1, sel=j2, out=ns0);
+    //Mux (a=s0, b=s1, sel=instruction[1], out=ns0);
+    Mux (a=s0, b=s1, sel=j2, out=ns0);
+    //Mux (a=s0, b=s1, sel=instruction[1], out=ns0);
+    Mux (a=s2, b=s3, sel=j2, out=ns1);
+    //Mux (a=s2, b=s3, sel=instruction[1], out=ns1);
+    Mux (a=ns0, b=ns1, sel=j1, out=CinsPCload);
+    //Mux (a=ns0, b=ns1, sel=instruction[0], out=CinsPCload);
     // End Jump Control //
 
     // if A-instruction load=true, else use jump control
-    Mux (a=true, b=CinsPCload, sel=instruction[15], out=PCload);
+    Mux (a=d1, b=CinsPCload, sel=instruction[15], out=PCload);
     PC (in=addressM, load=PCload, inc=true, reset=reset, out=pc);
 }
