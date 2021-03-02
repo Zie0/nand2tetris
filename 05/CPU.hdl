@@ -55,16 +55,16 @@ CHIP CPU {
     Mux (a=false, b=instruction[1], sel=instruction[15], out=j2);
     Mux (a=false, b=instruction[0], sel=instruction[15], out=j3);
 
-    Mux16 (a=instruction, b=cycle, sel=d1, out=toA);
+    Mux16 (a=instruction, b=cycle, sel=instruction[15], out=toA);
 
-    ARegister (in=toA, load=d1, out=addressM);
+    ARegister (in=toA, load=d1, out[0..15]=AMaIN, out[0..14]=PCin, out[0..14]=addressM);
     
     DRegister (in=cycle, load=d2, out=xALU);
     
     Mux (a=false, b=d3, sel=instruction[15], out=writeM);
 
     // compute A or M?    
-    Mux16 (a=addressM, b=inM, sel=a, out=yALU);
+    Mux16 (a=AMaIN, b=inM, sel=a, out=yALU);
 
     // ALU 
     ALU (x=xALU, y=yALU, zx=c1, nx=c2, zy=c3, ny=c4, f=c5, no=c6, zr=zr, ng=ng, out=cycle, out=outM);
@@ -84,7 +84,7 @@ CHIP CPU {
 
     Mux (a=false, b=JGT, sel=j3, out=s0);
     Mux (a=zr, b=JGE, sel=j3, out=s1);
-    Mux (a=ng, b=JNE, sel=j3, out=s2);
+    Mux (a=ng, b=NOTzr, sel=j3, out=s2);
     Mux (a=JLE, b=true, sel=j3, out=s3);
     Mux (a=s0, b=s1, sel=j2, out=ns0);
     Mux (a=s2, b=s3, sel=j2, out=ns1);
@@ -93,5 +93,5 @@ CHIP CPU {
 
     // if A-instruction load=true, else use jump control
     Mux (a=d1, b=CinsPCload, sel=instruction[15], out=PCload);
-    PC (in=addressM, load=PCload, inc=true, reset=reset, out=pc);
+    PC (in=AMaIN, load=PCload, inc=true, reset=reset, out[0..14]=pc);
 }
