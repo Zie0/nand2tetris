@@ -88,10 +88,10 @@ CHIP CPU {
     Mux (a=JLE, b=true, sel=j3, out=s3);
     Mux (a=s0, b=s1, sel=j2, out=ns0);
     Mux (a=s2, b=s3, sel=j2, out=ns1);
-    Mux (a=ns0, b=ns1, sel=j1, out=CinsPCload);
+    Mux (a=ns0, b=ns1, sel=j1, out=CinsJMP);
     // End Jump Control //
 
-    // if A-instruction load=true, else use jump control
-    Mux (a=d1, b=CinsPCload, sel=instruction[15], out=PCload);
-    PC (in=AMaIN, load=PCload, inc=true, reset=reset, out[0..14]=pc);
+    // if A-instruction load=false, else use jump control
+    Mux (a=false, b=CinsJMP, sel=instruction[15], out=JMPctrl);
+    PC (in=AMaIN, load=JMPctrl, inc=true, reset=reset, out[0..14]=pc);
 }
